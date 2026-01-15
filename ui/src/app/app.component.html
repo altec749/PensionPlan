@@ -1,0 +1,75 @@
+<main class="shell">
+  <header class="hero">
+    <p class="eyebrow">Pension Plan API</p>
+    <h1>Retirement Pot Planner</h1>
+    <p class="lede">Enter each field and calculate the pot required at retirement.</p>
+  </header>
+
+  <form class="card" (ngSubmit)="onSubmit()" #calcForm="ngForm">
+    <div class="grid">
+      <label>
+        <span>Retirement Age</span>
+        <input
+          type="number"
+          name="retirement_age"
+          min="0"
+          step="1"
+          required
+          [(ngModel)]="model.retirement_age"
+        />
+      </label>
+
+      <label>
+        <span>Annual Real Return</span>
+        <input
+          type="number"
+          name="annual_real_return"
+          step="0.001"
+          placeholder="0.04"
+          required
+          [(ngModel)]="model.annual_real_return"
+        />
+      </label>
+
+      <label>
+        <span>Monthly Drawdown</span>
+        <input
+          type="number"
+          name="monthly_drawdown"
+          min="0"
+          step="1"
+          required
+          [(ngModel)]="model.monthly_drawdown"
+        />
+      </label>
+
+      <label>
+        <span>Death Age</span>
+        <input
+          type="number"
+          name="death_age"
+          min="1"
+          step="1"
+          required
+          [(ngModel)]="model.death_age"
+        />
+      </label>
+    </div>
+
+    <div class="actions">
+      <button type="submit" [disabled]="calcForm.invalid">Calculate</button>
+      <span class="status" *ngIf="status">{{ status }}</span>
+      <span class="error" *ngIf="error">{{ error }}</span>
+    </div>
+  </form>
+
+  <section class="result" *ngIf="result">
+    <div>
+      <p class="label">Required pot at retirement</p>
+      <p class="value">
+        {{ result.required_pot_at_retirement | number: "1.0-0" }}
+      </p>
+    </div>
+    <p class="note" *ngIf="result.note">{{ result.note }}</p>
+  </section>
+</main>

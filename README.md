@@ -9,6 +9,20 @@ pip install -r requirements.txt
 uvicorn app:app --reload
 ```
 
+## UI (Angular)
+
+Build the Angular UI and serve it from the same FastAPI container:
+
+```powershell
+cd ui
+npm install
+npm run build
+cd ..
+uvicorn app:app --reload
+```
+
+Then open `http://127.0.0.1:8000/`.
+
 Example request:
 
 ```powershell
@@ -25,6 +39,15 @@ Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/calculate `
 ```
 
 ## Docker
+
+Build the UI first so the Docker image can copy the compiled assets:
+
+```powershell
+cd ui
+npm install
+npm run build
+cd ..
+```
 
 ```powershell
 docker build -t pension-api .
