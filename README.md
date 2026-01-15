@@ -84,5 +84,5 @@ az deployment sub create `
     containerAppEnvName=pension-env `
     containerAppName=pension-api `
     containerName=pension-api `
-    containerImage=ghcr.io/<owner>/pension-api:latest
+    containerImage=ghcr.io/altec749/pension-api:latest
 ```

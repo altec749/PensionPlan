@@ -48,13 +48,13 @@ jobs:
         uses: azure/cli@v2
         with:
           inlineScript: |
-            az deployment sub create `
-              --location westeurope `
-              --template-file infra/main.bicep `
-              --parameters `
-                containerImage=${{ env.IMAGE_NAME }}:${{ github.sha }} `
-                resourceGroupName=rg-pension `
-                containerAppName=${{ secrets.ACA_APP_NAME }} `
+            az deployment sub create \
+              --location westeurope \
+              --template-file infra/main.bicep \
+              --parameters \
+                containerImage=${{ env.IMAGE_NAME }}:${{ github.sha }} \
+                resourceGroupName=rg-pension \
+                containerAppName=${{ secrets.ACA_APP_NAME }} \
                 containerAppEnvName=${{ secrets.ACA_ENVIRONMENT }}
 
       - name: Deploy to Azure Container Apps
