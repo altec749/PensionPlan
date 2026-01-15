@@ -11,7 +11,7 @@ def test_zero_return_one_year_retirement() -> None:
         age_now=60,
         starting_balance=0.0,
         retirement_age=60,
-        annual_real_return_pcnt=0.0,
+        annual_real_return=0.0,
         monthly_drawdown=1000.0,
         death_age=61,
     )
@@ -29,7 +29,7 @@ def test_positive_return_matches_annuity_formula() -> None:
         age_now=60,
         starting_balance=0.0,
         retirement_age=60,
-        annual_real_return_pcnt=annual_real_return,
+        annual_real_return=annual_real_return,
         monthly_drawdown=500.0,
         death_age=62,
     )
@@ -46,7 +46,7 @@ def test_discounting_back_to_today() -> None:
         age_now=50,
         starting_balance=0.0,
         retirement_age=60,
-        annual_real_return_pcnt=0.05,
+        annual_real_return=0.05,
         monthly_drawdown=1000.0,
         death_age=61,
     )
@@ -69,7 +69,7 @@ def test_invalid_inputs() -> None:
             age_now=65,
             starting_balance=0.0,
             retirement_age=60,
-            annual_real_return_pcnt=0.02,
+            annual_real_return=0.02,
             monthly_drawdown=1000.0,
             death_age=90,
         )
