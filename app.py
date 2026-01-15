@@ -31,6 +31,5 @@ def calculate(request: CalculateRequest) -> CalculateResponse:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     return CalculateResponse(
-        required_pot_at_retirement=result.required_pot_at_retirement,
-        note="adam"
+        required_pot_at_retirement=result.required_pot_at_retirement
     )
