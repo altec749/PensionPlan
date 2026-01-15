@@ -1,0 +1,69 @@
+name: Deploy to Azure Container Apps
+
+on:
+  push:
+    branches: ["master"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/pension-api
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.IMAGE_NAME }}:latest
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy infrastructure (Bicep)
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az deployment sub create `
+              --location westeurope `
+              --template-file infra/main.bicep `
+              --parameters `
+                containerImage=${{ env.IMAGE_NAME }}:${{ github.sha }} `
+                resourceGroupName=rg-pension `
+                containerAppName=${{ secrets.ACA_APP_NAME }} `
+                containerAppEnvName=${{ secrets.ACA_ENVIRONMENT }}
+
+      - name: Deploy to Azure Container Apps
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          resourceGroup: rg-pension
+          containerAppName: ${{ secrets.ACA_APP_NAME }}
+          containerAppEnvironment: ${{ secrets.ACA_ENVIRONMENT }}
+          imageToDeploy: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          registryUrl: ghcr.io
+          registryUsername: ${{ secrets.GHCR_USERNAME }}
+          registryPassword: ${{ secrets.GHCR_TOKEN }}
