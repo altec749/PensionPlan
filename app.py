@@ -15,6 +15,7 @@ class CalculateRequest(BaseModel):
 
 class CalculateResponse(BaseModel):
     required_pot_at_retirement: float
+    note: str
 
 
 @app.post("/calculate", response_model=CalculateResponse)
@@ -30,5 +31,6 @@ def calculate(request: CalculateRequest) -> CalculateResponse:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     return CalculateResponse(
-        required_pot_at_retirement=result.required_pot_at_retirement
+        required_pot_at_retirement=result.required_pot_at_retirement,
+        note="adam"
     )

@@ -39,10 +39,10 @@ jobs:
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
             ${{ env.IMAGE_NAME }}:latest
 
-      - name: Azure login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      # - name: Azure login
+      #   uses: azure/login@v2
+      #   with:
+      #     creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       # - name: Deploy infrastructure (Bicep)
       #   uses: azure/cli@v2
@@ -57,13 +57,13 @@ jobs:
       #           containerAppName=${{ secrets.ACA_APP_NAME }} \
       #           containerAppEnvName=${{ secrets.ACA_ENVIRONMENT }}
 
-      - name: Deploy to Azure Container Apps
-        uses: azure/container-apps-deploy-action@v2
-        with:
-          resourceGroup: rg-pension
-          containerAppName: ${{ secrets.ACA_APP_NAME }}
-          containerAppEnvironment: ${{ secrets.ACA_ENVIRONMENT }}
-          imageToDeploy: ${{ env.IMAGE_NAME }}:${{ github.sha }}
-          registryUrl: ghcr.io
-          registryUsername: ${{ secrets.GHCR_USERNAME }}
-          registryPassword: ${{ secrets.GHCR_TOKEN }}
+      # - name: Deploy to Azure Container Apps
+      #   uses: azure/container-apps-deploy-action@v2
+      #   with:
+      #     resourceGroup: rg-pension
+      #     containerAppName: ${{ secrets.ACA_APP_NAME }}
+      #     containerAppEnvironment: ${{ secrets.ACA_ENVIRONMENT }}
+      #     imageToDeploy: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+      #     registryUrl: ghcr.io
+      #     registryUsername: ${{ secrets.GHCR_USERNAME }}
+      #     registryPassword: ${{ secrets.GHCR_TOKEN }}
