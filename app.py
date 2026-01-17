@@ -1,6 +1,7 @@
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -11,6 +12,13 @@ app = FastAPI(title="Pension Plan API")
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class CalculateRequest(BaseModel):
     retirement_age: int = Field(..., ge=0)
@@ -55,3 +63,8 @@ def calculate(request: CalculateRequest) -> CalculateResponse:
         required_pot_at_retirement=result.required_pot_at_retirement,
         note="",
     )
+
+
+@app.options("/calculate")
+def calculate_options() -> Response:
+    return Response(status_code=200)

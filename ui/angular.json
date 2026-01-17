@@ -23,7 +23,7 @@
                 "glob": "**/*",
                 "input": "public"
               },
-              "favicon.svg"
+              "src/favicon.svg"
             ],
             "styles": [
               "src/styles.css"
