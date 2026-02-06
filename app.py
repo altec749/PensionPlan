@@ -6,6 +6,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from pension import calculate_required_annual_contribution
 from pension import calculate_required_pot
 
 app = FastAPI(title="Pension Plan API")
@@ -29,6 +30,18 @@ class CalculateRequest(BaseModel):
 
 class CalculateResponse(BaseModel):
     required_pot_at_retirement: float
+    note: str = ""
+
+
+class AnnualContributionRequest(BaseModel):
+    target_pot: float = Field(..., ge=0)
+    starting_pot: float = Field(..., ge=0)
+    years_until_retirement: int = Field(..., gt=0)
+    annual_real_return: float = 0.0
+
+
+class AnnualContributionResponse(BaseModel):
+    required_annual_contribution: float
     note: str = ""
 
 
@@ -65,6 +78,31 @@ def calculate(request: CalculateRequest) -> CalculateResponse:
     )
 
 
+@app.post("/calculate-annual-contribution", response_model=AnnualContributionResponse)
+def calculate_annual_contribution(
+    request: AnnualContributionRequest,
+) -> AnnualContributionResponse:
+    try:
+        result = calculate_required_annual_contribution(
+            target_pot=request.target_pot,
+            starting_pot=request.starting_pot,
+            years_until_retirement=request.years_until_retirement,
+            annual_real_return=request.annual_real_return,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    return AnnualContributionResponse(
+        required_annual_contribution=result.required_annual_contribution,
+        note="",
+    )
+
+
 @app.options("/calculate")
 def calculate_options() -> Response:
+    return Response(status_code=200)
+
+
+@app.options("/calculate-annual-contribution")
+def calculate_annual_contribution_options() -> Response:
     return Response(status_code=200)

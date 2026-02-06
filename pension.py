@@ -8,6 +8,11 @@ class PensionPlanResult:
     required_pot_at_retirement: float
 
 
+@dataclass(frozen=True)
+class AnnualContributionResult:
+    required_annual_contribution: float
+
+
 def _calculate_monthly_effective_rate(annual_real_return: float) -> float:
     if annual_real_return <= -1:
         raise ValueError("annual_real_return must be greater than -1.0")
@@ -50,4 +55,42 @@ def calculate_required_pot(
 
     return PensionPlanResult(
         required_pot_at_retirement=required_pot_at_retirement
+    )
+
+
+def calculate_required_annual_contribution(
+    *,
+    target_pot: float,
+    starting_pot: float,
+    years_until_retirement: int,
+    annual_real_return: float = 0.0,
+) -> AnnualContributionResult:
+    """
+    Calculate the required annual contribution in real terms to hit a target pot.
+
+    Contributions are assumed to be made at the end of each year.
+    """
+    if years_until_retirement <= 0:
+        raise ValueError("years_until_retirement must be positive")
+    if target_pot < 0:
+        raise ValueError("target_pot must be non-negative")
+    if starting_pot < 0:
+        raise ValueError("starting_pot must be non-negative")
+    if annual_real_return <= -1:
+        raise ValueError("annual_real_return must be greater than -1.0")
+
+    growth_factor = (1.0 + annual_real_return) ** years_until_retirement
+    target_gap = target_pot - starting_pot * growth_factor
+
+    if target_gap <= 0:
+        required_annual_contribution = 0.0
+    elif annual_real_return == 0:
+        required_annual_contribution = target_gap / years_until_retirement
+    else:
+        required_annual_contribution = (
+            target_gap * annual_real_return / (growth_factor - 1.0)
+        )
+
+    return AnnualContributionResult(
+        required_annual_contribution=required_annual_contribution
     )
