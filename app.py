@@ -22,25 +22,16 @@ app.add_middleware(
 )
 
 class CalculateRequest(BaseModel):
+    age_now: int = Field(..., ge=0)
     retirement_age: int = Field(..., ge=0)
     annual_real_return: float
     monthly_drawdown: float = Field(..., ge=0)
     death_age: int = Field(90, gt=0)
+    starting_pot: float = Field(..., ge=0)
 
 
 class CalculateResponse(BaseModel):
     required_pot_at_retirement: float
-    note: str = ""
-
-
-class AnnualContributionRequest(BaseModel):
-    target_pot: float = Field(..., ge=0)
-    starting_pot: float = Field(..., ge=0)
-    years_until_retirement: int = Field(..., gt=0)
-    annual_real_return: float = 0.0
-
-
-class AnnualContributionResponse(BaseModel):
     required_annual_contribution: float
     note: str = ""
 
@@ -63,46 +54,32 @@ def index() -> HTMLResponse:
 @app.post("/calculate", response_model=CalculateResponse)
 def calculate(request: CalculateRequest) -> CalculateResponse:
     try:
-        result = calculate_required_pot(
+        years_until_retirement = request.retirement_age - request.age_now
+        if years_until_retirement <= 0:
+            raise ValueError("retirement_age must be greater than age_now")
+
+        pot_result = calculate_required_pot(
             retirement_age=request.retirement_age,
             annual_real_return=request.annual_real_return,
             monthly_drawdown=request.monthly_drawdown,
             death_age=request.death_age,
         )
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-    return CalculateResponse(
-        required_pot_at_retirement=result.required_pot_at_retirement,
-        note="",
-    )
-
-
-@app.post("/calculate-annual-contribution", response_model=AnnualContributionResponse)
-def calculate_annual_contribution(
-    request: AnnualContributionRequest,
-) -> AnnualContributionResponse:
-    try:
-        result = calculate_required_annual_contribution(
-            target_pot=request.target_pot,
+        contribution_result = calculate_required_annual_contribution(
+            target_pot=pot_result.required_pot_at_retirement,
             starting_pot=request.starting_pot,
-            years_until_retirement=request.years_until_retirement,
+            years_until_retirement=years_until_retirement,
             annual_real_return=request.annual_real_return,
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    return AnnualContributionResponse(
-        required_annual_contribution=result.required_annual_contribution,
+    return CalculateResponse(
+        required_pot_at_retirement=pot_result.required_pot_at_retirement,
+        required_annual_contribution=contribution_result.required_annual_contribution,
         note="",
     )
 
 
 @app.options("/calculate")
 def calculate_options() -> Response:
-    return Response(status_code=200)
-
-
-@app.options("/calculate-annual-contribution")
-def calculate_annual_contribution_options() -> Response:
     return Response(status_code=200)

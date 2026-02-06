@@ -13,9 +13,6 @@ export class App {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly result = signal<CalculateResponse | null>(null);
-  readonly contributionLoading = signal(false);
-  readonly contributionError = signal<string | null>(null);
-  readonly contributionResult = signal<AnnualContributionResponse | null>(null);
 
   private readonly fb = inject(FormBuilder);
   private readonly http = inject(HttpClient);
@@ -28,14 +25,10 @@ export class App {
     retirement_age: [65, [Validators.required, Validators.min(0)]],
     annual_real_return: [0.04, [Validators.required]],
     monthly_drawdown: [2500, [Validators.required, Validators.min(0)]],
-    death_age: [90, [Validators.required, Validators.min(1)]]
-  });
-
-  readonly annualForm = this.fb.group({
+    death_age: [90, [Validators.required, Validators.min(1)]],
     target_pot: [500000, [Validators.required, Validators.min(0)]],
     starting_pot: [20000, [Validators.required, Validators.min(0)]],
-    years_until_retirement: [30, [Validators.required, Validators.min(1)]],
-    annual_real_return: [0.04, [Validators.required]]
+    years_until_retirement: [30, [Validators.required, Validators.min(1)]]
   });
 
   submit(): void {
@@ -46,9 +39,8 @@ export class App {
 
     const formValue = this.form.getRawValue();
     const apiBase = (this.apiForm.getRawValue().apiBase ?? '').trim();
-    const url = apiBase.length > 0
-      ? `${apiBase.replace(/\/$/, '')}/calculate`
-      : '/calculate';
+    const baseUrl = apiBase.length > 0 ? apiBase.replace(/\/$/, '') : '';
+    const url = baseUrl.length > 0 ? `${baseUrl}/calculate` : '/calculate';
 
     this.loading.set(true);
     this.error.set(null);
@@ -59,7 +51,10 @@ export class App {
         retirement_age: formValue.retirement_age,
         annual_real_return: formValue.annual_real_return,
         monthly_drawdown: formValue.monthly_drawdown,
-        death_age: formValue.death_age
+        death_age: formValue.death_age,
+        target_pot: formValue.target_pot,
+        starting_pot: formValue.starting_pot,
+        years_until_retirement: formValue.years_until_retirement
       })
       .subscribe({
         next: (data) => {
@@ -69,41 +64,6 @@ export class App {
         error: (err: HttpErrorResponse) => {
           this.loading.set(false);
           this.error.set(this.describeError(err));
-        }
-      });
-  }
-
-  submitAnnualContribution(): void {
-    if (this.annualForm.invalid) {
-      this.annualForm.markAllAsTouched();
-      return;
-    }
-
-    const formValue = this.annualForm.getRawValue();
-    const apiBase = (this.apiForm.getRawValue().apiBase ?? '').trim();
-    const url = apiBase.length > 0
-      ? `${apiBase.replace(/\/$/, '')}/calculate-annual-contribution`
-      : '/calculate-annual-contribution';
-
-    this.contributionLoading.set(true);
-    this.contributionError.set(null);
-    this.contributionResult.set(null);
-
-    this.http
-      .post<AnnualContributionResponse>(url, {
-        target_pot: formValue.target_pot,
-        starting_pot: formValue.starting_pot,
-        years_until_retirement: formValue.years_until_retirement,
-        annual_real_return: formValue.annual_real_return
-      })
-      .subscribe({
-        next: (data) => {
-          this.contributionResult.set(data);
-          this.contributionLoading.set(false);
-        },
-        error: (err: HttpErrorResponse) => {
-          this.contributionLoading.set(false);
-          this.contributionError.set(this.describeError(err));
         }
       });
   }
@@ -124,10 +84,7 @@ export class App {
 
 interface CalculateResponse {
   required_pot_at_retirement: number;
-  note: string;
-}
-
-interface AnnualContributionResponse {
   required_annual_contribution: number;
-  note: string;
+  note?: string;
+  contribution_note?: string;
 }
