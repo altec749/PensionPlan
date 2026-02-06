@@ -1,4 +1,25 @@
 <main class="page">
+  <section class="api-base">
+    <div class="api-base-text">
+      <p class="eyebrow">Connection</p>
+      <h2>API base URL</h2>
+      <p class="lead">Used for both calculators below.</p>
+    </div>
+    <div class="hero-card">
+      <form class="form" [formGroup]="apiForm">
+        <label class="field">
+          <span>API base URL</span>
+          <input
+            type="text"
+            formControlName="apiBase"
+            placeholder="http://localhost:8000"
+          />
+          <small>Leave blank to use the same host as the UI.</small>
+        </label>
+      </form>
+    </div>
+  </section>
+
   <header class="hero">
     <div class="hero-text">
       <p class="eyebrow">Pension Plan API</p>
@@ -9,16 +30,6 @@
     </div>
     <div class="hero-card">
       <form class="form" [formGroup]="form" (ngSubmit)="submit()">
-        <label class="field">
-          <span>API base URL</span>
-          <input
-            type="text"
-            formControlName="apiBase"
-            placeholder="http://localhost:8000"
-          />
-          <small>Leave blank to use the same host as the UI.</small>
-        </label>
-
         <div class="grid">
           <label class="field">
             <span>Retirement age</span>
@@ -78,6 +89,92 @@
         {{ result()?.required_pot_at_retirement | number: '1.0-2' }}
       </div>
       <p class="note" *ngIf="result()?.note">{{ result()?.note }}</p>
+    </div>
+  </section>
+
+  <section class="calculator">
+    <div class="calculator-text">
+      <p class="eyebrow">Fixed annual contributions</p>
+      <h2>Reach a target pot</h2>
+      <p class="lead">
+        Provide the target amount and time horizon to estimate the annual
+        contribution needed.
+      </p>
+    </div>
+    <div class="hero-card">
+      <form class="form" [formGroup]="annualForm" (ngSubmit)="submitAnnualContribution()">
+        <div class="grid">
+          <label class="field">
+            <span>Target pot at retirement</span>
+            <input type="number" min="0" step="1" formControlName="target_pot" />
+            <small
+              *ngIf="annualForm.controls.target_pot.touched && annualForm.controls.target_pot.invalid"
+            >
+              Enter a non-negative amount.
+            </small>
+          </label>
+
+          <label class="field">
+            <span>Starting pot today</span>
+            <input type="number" min="0" step="1" formControlName="starting_pot" />
+            <small
+              *ngIf="annualForm.controls.starting_pot.touched && annualForm.controls.starting_pot.invalid"
+            >
+              Enter a non-negative amount.
+            </small>
+          </label>
+
+          <label class="field">
+            <span>Years until retirement</span>
+            <input
+              type="number"
+              min="1"
+              step="1"
+              formControlName="years_until_retirement"
+            />
+            <small
+              *ngIf="annualForm.controls.years_until_retirement.touched && annualForm.controls.years_until_retirement.invalid"
+            >
+              Enter a positive number of years.
+            </small>
+          </label>
+
+          <label class="field">
+            <span>Annual real return</span>
+            <input
+              type="number"
+              step="0.001"
+              formControlName="annual_real_return"
+            />
+            <small>Example: 0.04 for 4%.</small>
+          </label>
+        </div>
+
+        <button class="action" type="submit" [disabled]="contributionLoading()">
+          {{ contributionLoading() ? 'Calculating...' : 'Calculate annual contribution' }}
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <section
+    class="result"
+    *ngIf="contributionLoading() || contributionError() || contributionResult()"
+  >
+    <div class="status loading" *ngIf="contributionLoading()">
+      Sending request...
+    </div>
+    <div class="status error" *ngIf="contributionError()">
+      {{ contributionError() }}
+    </div>
+    <div class="status success" *ngIf="contributionResult()">
+      <p class="label">Required annual contribution</p>
+      <div class="value">
+        {{ contributionResult()?.required_annual_contribution | number: '1.0-2' }}
+      </div>
+      <p class="note" *ngIf="contributionResult()?.note">
+        {{ contributionResult()?.note }}
+      </p>
     </div>
   </section>
 </main>
