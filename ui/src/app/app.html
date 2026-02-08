@@ -30,15 +30,38 @@
     </div>
     <div class="hero-card">
       <form class="form" [formGroup]="form" (ngSubmit)="submit()">
-        <div class="form-section">Retirement drawdown</div>
+        <div class="form-section">Current state</div>
         <div class="grid">
           <label class="field">
-            <span>Retirement age</span>
-            <input type="number" min="0" formControlName="retirement_age" />
+            <span>Current age</span>
+            <input type="number" min="0" formControlName="age_now" />
             <small
-              *ngIf="form.controls.retirement_age.touched && form.controls.retirement_age.invalid"
+              *ngIf="form.controls.age_now.touched && form.controls.age_now.invalid"
             >
               Enter a non-negative age.
+            </small>
+          </label>
+
+          <label class="field">
+            <span>Current pot size</span>
+            <input type="number" min="0" step="1" formControlName="starting_pot" />
+            <small
+              *ngIf="form.controls.starting_pot.touched && form.controls.starting_pot.invalid"
+            >
+              Enter a non-negative amount.
+            </small>
+          </label>
+        </div>
+
+        <div class="form-section">Assumptions</div>
+        <div class="grid">
+          <label class="field">
+            <span>Death age</span>
+            <input type="number" min="1" formControlName="death_age" />
+            <small
+              *ngIf="form.controls.death_age.touched && form.controls.death_age.invalid"
+            >
+              Enter a positive age.
             </small>
           </label>
 
@@ -51,9 +74,12 @@
             />
             <small>Example: 0.04 for 4%.</small>
           </label>
+        </div>
 
+        <div class="form-section">Targets</div>
+        <div class="grid">
           <label class="field">
-            <span>Monthly drawdown</span>
+            <span>Target monthly drawdown</span>
             <input
               type="number"
               min="0"
@@ -68,46 +94,12 @@
           </label>
 
           <label class="field">
-            <span>Death age</span>
-            <input type="number" min="1" formControlName="death_age" />
-            <small>Defaults to 90.</small>
-          </label>
-        </div>
-
-        <div class="form-section">Contribution target</div>
-        <div class="grid">
-          <label class="field">
-            <span>Target pot at retirement</span>
-            <input type="number" min="0" step="1" formControlName="target_pot" />
+            <span>Target retirement age</span>
+            <input type="number" min="0" formControlName="retirement_age" />
             <small
-              *ngIf="form.controls.target_pot.touched && form.controls.target_pot.invalid"
+              *ngIf="form.controls.retirement_age.touched && form.controls.retirement_age.invalid"
             >
-              Enter a non-negative amount.
-            </small>
-          </label>
-
-          <label class="field">
-            <span>Starting pot today</span>
-            <input type="number" min="0" step="1" formControlName="starting_pot" />
-            <small
-              *ngIf="form.controls.starting_pot.touched && form.controls.starting_pot.invalid"
-            >
-              Enter a non-negative amount.
-            </small>
-          </label>
-
-          <label class="field">
-            <span>Years until retirement</span>
-            <input
-              type="number"
-              min="1"
-              step="1"
-              formControlName="years_until_retirement"
-            />
-            <small
-              *ngIf="form.controls.years_until_retirement.touched && form.controls.years_until_retirement.invalid"
-            >
-              Enter a positive number of years.
+              Enter a non-negative age.
             </small>
           </label>
         </div>
@@ -136,9 +128,6 @@
           <div class="value">
             {{ result()?.required_annual_contribution | number: '1.0-2' }}
           </div>
-          <p class="note" *ngIf="result()?.contribution_note">
-            {{ result()?.contribution_note }}
-          </p>
         </div>
       </div>
     </div>
